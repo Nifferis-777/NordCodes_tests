@@ -15,6 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.11.0</junit.version>
         <allure.version>2.29.1</allure.version>
+        <restassured.version>5.5.0</restassured.version>
     </properties>
 
     <dependencies>
@@ -31,7 +32,6 @@
         </dependency>
 
 
-
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -42,10 +42,9 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>5.5.6</version>
+            <version>${restassured.version}</version>
             <scope>test</scope>
         </dependency>
-
 
         <dependency>
             <groupId>io.qameta.allure</groupId>

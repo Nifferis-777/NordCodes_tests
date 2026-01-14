@@ -5,6 +5,7 @@ import java.util.Properties;
 
 public class LoaderConfig {
 
+
     private static volatile LoaderConfig instance;
     private final Properties properties;
 
@@ -35,5 +36,11 @@ public class LoaderConfig {
     public String getUrl() {
         return properties.getProperty("URL");
     }
+
+    public String getApiKey() {
+        return properties.getProperty("API_KEY");
+    }
+
+    public String getToken() { return properties.getProperty("TOKEN"); }
 
 }
