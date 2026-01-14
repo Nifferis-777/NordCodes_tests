@@ -21,7 +21,7 @@ java -jar -Dsecret=qazWSXedc -Dmock=http://localhost:8888/ internal-0.0.1-SNAPSH
 
 6) ` Allure ` 
 
-## Описание структуры
+## Описание структуры проекта
 
 
 
