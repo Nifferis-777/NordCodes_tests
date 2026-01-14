@@ -8,7 +8,7 @@ java -jar -Dsecret=qazWSXedc -Dmock=http://localhost:8888/ internal-0.0.1-SNAPSH
  
 ```
 
-### Используемый стек технологий:
+## Используемый стек технологий:
 1) ` Java `
 
 2) ` Maven `
