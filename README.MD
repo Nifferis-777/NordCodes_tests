@@ -15,9 +15,11 @@ java -jar -Dsecret=qazWSXedc -Dmock=http://localhost:8888/ internal-0.0.1-SNAPSH
 
 3) ` JUnit5 ` 
 
-4) ` WireMock ` 
+4) ` WireMock `
 
-5) ` Allure ` 
+5) ` RestAssured `
+
+6) ` Allure ` 
 
 ## Описание структуры
 
