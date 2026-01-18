@@ -2,8 +2,11 @@ package api_tests;
 
 import api_tests.client.ApiClient;
 import io.qameta.allure.*;
+import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
 
+import static api_tests.constants.ApiConstants.*;
+import static org.hamcrest.Matchers.equalTo;
 
 @Epic("API-Тесты")
 @Feature("Позитивные тесты")
@@ -37,7 +40,13 @@ public class PositiveTests extends BaseApiTest {
     void tearDown() {
         if (loginPerformedInTest) {
             Allure.step("Завершение сессии пользователя", () -> {
-                apiClient.logout();
+                Response response = apiClient.sendPostRequest(Actions.LOGOUT);
+                Allure.step("Валидация ответа", () -> {
+                    response.then()
+                            .assertThat()
+                            .statusCode(StatusCodes.OK)
+                            .body(ResponseFields.RESULT, equalTo(ResponseFields.OK));
+                });
             });
         }
         loginPerformedInTest = false;
@@ -45,8 +54,14 @@ public class PositiveTests extends BaseApiTest {
 
     private void performLogin() {
         Allure.step("Аутентификация пользователя", () -> {
-            apiClient.login();
+            Response response = apiClient.sendPostRequest(Actions.LOGIN);
             loginPerformedInTest = true;
+            Allure.step("Валидация ответа", () -> {
+                response.then()
+                        .assertThat()
+                        .statusCode(StatusCodes.OK)
+                        .body(ResponseFields.RESULT, equalTo(ResponseFields.OK));
+            });
         });
     }
 
@@ -57,9 +72,15 @@ public class PositiveTests extends BaseApiTest {
     @Severity(SeverityLevel.CRITICAL)
     @Tag(TAG_NAME)
     void authUser() {
-        Allure.step("Выполнение логина", () -> {
-            apiClient.login();
+        Allure.step("Аутентификация пользователя", () -> {
+            Response response = apiClient.sendPostRequest(Actions.LOGIN);
             loginPerformedInTest = true;
+            Allure.step("Валидация ответа", () -> {
+                response.then()
+                        .assertThat()
+                        .statusCode(StatusCodes.OK)
+                        .body(ResponseFields.RESULT, equalTo(ResponseFields.OK));
+            });
         });
     }
 
@@ -72,7 +93,13 @@ public class PositiveTests extends BaseApiTest {
     void doAction() {
         performLogin();
         Allure.step("Выполнение действия", () -> {
-            apiClient.doAction();
+            Response response = apiClient.sendPostRequest(Actions.ACTION);
+            Allure.step("Валидация ответа", () -> {
+                response.then()
+                        .assertThat()
+                        .statusCode(StatusCodes.OK)
+                        .body(ResponseFields.RESULT, equalTo(ResponseFields.OK));
+            });
         });
     }
 
@@ -88,14 +115,26 @@ public class PositiveTests extends BaseApiTest {
             int numberOfAttempts = 3;
             for (int i = 1; i <= numberOfAttempts; i++) {
                 final int attemptNumber = i;
-                Allure.step(String.format("Попытка выполнения действия №%d", attemptNumber), () -> {
-                    apiClient.doAction();
+                Allure.step(String.format("Выполнение действия №%d", attemptNumber), () -> {
+                    Response response = apiClient.sendPostRequest(Actions.ACTION);
+                    Allure.step("Валидация ответа", () -> {
+                        response.then()
+                                .assertThat()
+                                .statusCode(StatusCodes.OK)
+                                .body(ResponseFields.RESULT, equalTo(ResponseFields.OK));
+                    });
                 });
             }
         });
         Allure.step("Завершение сессии пользователя", () -> {
-            apiClient.logout();
+            Response response = apiClient.sendPostRequest(Actions.LOGOUT);
             loginPerformedInTest = false;
+            Allure.step("Валидация ответа", () -> {
+                response.then()
+                        .assertThat()
+                        .statusCode(StatusCodes.OK)
+                        .body(ResponseFields.RESULT, equalTo(ResponseFields.OK));
+            });
         });
     }
 }

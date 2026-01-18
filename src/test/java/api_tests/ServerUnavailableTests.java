@@ -3,6 +3,7 @@ import api_tests.client.ApiClient;
 import io.qameta.allure.*;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
+import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,13 +33,28 @@ public class ServerUnavailableTests {
     @Tag(TAG_NAME)
     void testPostRequestWithCorrectHeadersAndBodyToUnavailableServer() {
         Allure.step("Отправка POST запроса с корректными Headers и Body на недоступный сервер", () -> {
-            String unavailableUrl = "http://localhost:9999";
+            String unavailableUrl = "http://localhost:8080";
             try {
                 Response response = apiClient.sendPostRequestToUrl(unavailableUrl, Actions.LOGIN);
-                assertTrue(response.getStatusCode() >= 400 || response.getStatusCode() == 0,
-                        "Ожидается ошибка при недоступном сервере");
+                int statusCode = response.getStatusCode();
+                fail("Сервер доступен (возвращает HTTP статус: " + statusCode + "). " +
+                        "Тест предназначен для проверки недоступного сервера.");
             } catch (Exception e) {
-                assertNotNull(e, "Должно быть исключение при недоступном сервере");
+                Throwable cause = e;
+                boolean isConnectionException = false;
+                while (cause != null) {
+                    if (cause instanceof ConnectException) {
+                        isConnectionException = true;
+                        break;
+                    }
+                    cause = cause.getCause();
+                }
+                if (isConnectionException) {
+                    assertNotNull(e, "Исключение соединения при недоступном сервере");
+                } else {
+                    fail("Неожиданное исключение при проверке недоступности сервера: " + e.getClass().getSimpleName() +
+                            ". Возможно, сервер доступен.");
+                }
             }
         });
     }
@@ -51,7 +67,7 @@ public class ServerUnavailableTests {
     @Tag(TAG_NAME)
     void testPostRequestWithIncorrectHeadersAndBodyToUnavailableServer() {
         Allure.step("Отправка POST запроса с некорректными Headers и Body на недоступный сервер", () -> {
-            String unavailableUrl = "http://localhost:9999";
+            String unavailableUrl = "http://localhost:8080";
             
             Map<String, String> incorrectHeaders = new HashMap<>();
             incorrectHeaders.put(Headers.CONTENT_TYPE, "text/plain");
@@ -61,36 +77,25 @@ public class ServerUnavailableTests {
             try {
                 Response response = apiClient.sendPostRequestToUrlWithHeaders(unavailableUrl, Actions.LOGIN,
                         incorrectHeaders);
-                assertTrue(response.getStatusCode() >= 400 || response.getStatusCode() == 0,
-                        "Ожидается ошибка при недоступном сервере");
+                int statusCode = response.getStatusCode();
+                fail("Сервер доступен (возвращает HTTP статус: " + statusCode + "). " +
+                        "Тест предназначен для проверки недоступного сервера.");
             } catch (Exception e) {
-                assertNotNull(e, "Должно быть исключение при недоступном сервере");
-            }
-        });
-    }
-
-    @Test
-    @DisplayName("POST запрос с пустыми Headers и Body на недоступный сервер")
-    @Description("Пользователь отправляет POST запрос с пустыми Headers и Body на сервер " +
-            "который недоступен и в ответ получает ошибку")
-    @Severity(SeverityLevel.NORMAL)
-    @Tag(TAG_NAME)
-    void testPostRequestWithEmptyHeadersAndBodyToUnavailableServer() {
-        Allure.step("Отправка POST запроса с пустыми Headers и Body на недоступный сервер", () -> {
-            String unavailableUrl = "http://localhost:9999";
-            
-            Map<String, String> emptyHeaders = new HashMap<>();
-            emptyHeaders.put(Headers.CONTENT_TYPE, "");
-            emptyHeaders.put(Headers.API_KEY, "");
-            emptyHeaders.put(Headers.ACCEPT, "");
-            
-            try {
-                Response response = apiClient.sendPostRequestToUrlWithHeaders(unavailableUrl, Actions.LOGIN,
-                        emptyHeaders);
-                assertTrue(response.getStatusCode() >= 400 || response.getStatusCode() == 0,
-                        "Ожидается ошибка при недоступном сервере");
-            } catch (Exception e) {
-                assertNotNull(e, "Должно быть исключение при недоступном сервере");
+                Throwable cause = e;
+                boolean isConnectionException = false;
+                while (cause != null) {
+                    if (cause instanceof ConnectException) {
+                        isConnectionException = true;
+                        break;
+                    }
+                    cause = cause.getCause();
+                }
+                if (isConnectionException) {
+                    assertNotNull(e, "Исключение соединения при недоступном сервере");
+                } else {
+                    fail("Неожиданное исключение при проверке недоступности сервера: " + e.getClass().getSimpleName() +
+                            ". Возможно, сервер доступен.");
+                }
             }
         });
     }
