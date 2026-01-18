@@ -1,104 +1,102 @@
 package api_tests;
-import configs.LoaderConfig;
+
+import api_tests.client.ApiClient;
 import io.qameta.allure.*;
 import org.junit.jupiter.api.*;
-import java.util.HashMap;
-import java.util.Map;
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
 
-@Epic("API Тесты")
+
+@Epic("API-Тесты")
 @Feature("Позитивные тесты")
-@DisplayName("Позитивные тесты API c проверкой разных action")
+@DisplayName("Позитивные API-тесты c проверкой разных action")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class PositiveTests extends BaseApiTest {
 
-public class PositiveTests {
+    private static final String TAG_NAME = "Positive_tests";
 
-    private static final LoaderConfig config = LoaderConfig.getInstance();
+    private static final String SUCCESSAUTH_DESCRIPTION = "Пользователь отправляет POST-запрос с указанием " +
+            "корректных параметров в теле (Body) и заголовках (Headers). В ответ возвращается JSON " +
+            "с телом успешного ответа (result: OK). Происходит завершение сессии пользователя (logout)";
 
-    private static final String BASE_URL = config.getUrl();
-    private static final String API_KEY = config.getApiKey();
-    private static final String TOKEN = config.getToken();
+    private static final String DO_ACTION_DESCRIPTION = "Пользователь успешно аутентифицируется, совершает действие." +
+            " В ответ возвращается JSON с телом успешного ответа (result: OK). " +
+            "Происходит завершение сессии пользователя (logout)";
 
+    private static final String MANY_DO_ACTION_DESCRIPTION = "Пользователь успешно аутентифицируется, совершает " +
+            "действие несколько раз. В ответ возвращается JSON с телом успешного ответа (result: OK).Происходит " +
+            "завершение сессии пользователя (logout)";
+
+    private ApiClient apiClient;
     private boolean loginPerformedInTest = false;
 
+    @BeforeEach
+    void setUp() {
+        apiClient = new ApiClient();
+    }
+
     @AfterEach
-    public void logoutAfterEachTest() {
+    void tearDown() {
         if (loginPerformedInTest) {
             Allure.step("Завершение сессии пользователя", () -> {
-                sendPostRequest("LOGOUT");
+                apiClient.logout();
             });
         }
         loginPerformedInTest = false;
     }
 
-    private void sendPostRequest(String action) {
-        Map<String, String> bodyParams = new HashMap<>();
-        bodyParams.put("token", TOKEN);
-        bodyParams.put("action", action);
-
-        given()
-                .baseUri(BASE_URL)
-                .basePath("/endpoint")
-                .headers(
-                        "Content-Type", "application/x-www-form-urlencoded",
-                        "X-Api-Key", API_KEY,
-                        "Accept", "application/json"
-                )
-                .formParams(bodyParams)
-                .when()
-                .post()
-                .then()
-                .assertThat()
-                .statusCode(200)
-                .body("result", equalTo("OK"));
-
-    }
-
     private void performLogin() {
-        sendPostRequest("LOGIN");
-        loginPerformedInTest = true;
+        Allure.step("Аутентификация пользователя", () -> {
+            apiClient.login();
+            loginPerformedInTest = true;
+        });
     }
 
     @Test
     @Order(1)
     @DisplayName("Успешная аутентификация пользователя")
-    @Description("Пользователь отправляет 'Post-запрос' с указанием корректных параметров в теле (Body) " +
-            "и заголовках (Headers). В ответ возвращается json c телом успешного ответа.")
+    @Description(SUCCESSAUTH_DESCRIPTION)
     @Severity(SeverityLevel.CRITICAL)
-    @Tag("/auth")
+    @Tag(TAG_NAME)
     void authUser() {
-        sendPostRequest("LOGIN");
-        loginPerformedInTest = true;
+        Allure.step("Выполнение логина", () -> {
+            apiClient.login();
+            loginPerformedInTest = true;
+        });
     }
 
     @Test
     @Order(2)
-    @DisplayName("Выполнение действия")
-    @Description("Пользователь успешно аутентифицируется и посылает Post-запрос на выполнение действия. " +
-            "В ответ возвращается json c телом успешного ответа.")
+    @DisplayName("Выполнение действия пользователем")
+    @Description(DO_ACTION_DESCRIPTION)
     @Severity(SeverityLevel.CRITICAL)
-    @Tag("/doAction")
+    @Tag(TAG_NAME)
     void doAction() {
-        Allure.step("Аутентификация пользователя", this::performLogin);
+        performLogin();
         Allure.step("Выполнение действия", () -> {
-            sendPostRequest("ACTION");
+            apiClient.doAction();
         });
     }
 
     @Test
     @Order(3)
-    @DisplayName("Завершение сессии пользователя")
-    @Description("Пользователь успешно аутентифицируется и посылает Post-запрос на завершение сессии." +
-            "В ответ возвращается json c телом успешного ответа. ")
+    @DisplayName("Выполнение действия пользователем несколько раз")
+    @Description(MANY_DO_ACTION_DESCRIPTION)
     @Severity(SeverityLevel.CRITICAL)
-    @Tag("/logout")
-    void logoutUser() {
-        Allure.step("Предварительный логин", this::performLogin);
-        Allure.step("Основное действие LOGOUT", () -> {
-            sendPostRequest("LOGOUT");
+    @Tag(TAG_NAME)
+    void manyDoAction() {
+        performLogin();
+        Allure.step("Выполнение действия несколько раз", () -> {
+            int numberOfAttempts = 3;
+            for (int i = 1; i <= numberOfAttempts; i++) {
+                final int attemptNumber = i;
+                Allure.step(String.format("Попытка выполнения действия №%d", attemptNumber), () -> {
+                    apiClient.doAction();
+                });
+            }
         });
-        loginPerformedInTest = false;
+        Allure.step("Завершение сессии пользователя", () -> {
+            apiClient.logout();
+            loginPerformedInTest = false;
+        });
     }
 }
 
