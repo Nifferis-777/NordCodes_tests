@@ -12,18 +12,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Epic("API-Тесты")
 @Feature("Тесты недоступного сервера")
-@DisplayName("Тесты недоступного сервера (отключены по умолчанию)")
-@Disabled("Тесты отключены по умолчанию")
+@DisplayName("Тесты недоступного сервера")
+@Disabled("Тесты отключены по умолчанию. Запуск производится при недоступном сервере")
 public class ServerUnavailableTests {
 
     private static final String TAG_NAME = "Server_unavailable_tests";
     private ApiClient apiClient;
 
-
     @BeforeEach
     void setUp() {
         apiClient = new ApiClient();
     }
+
 
     @Test
     @DisplayName("POST-запрос с корректными Headers и Body на недоступный сервер")
@@ -31,7 +31,7 @@ public class ServerUnavailableTests {
             "и в ответ получает ошибку")
     @Severity(SeverityLevel.NORMAL)
     @Tag(TAG_NAME)
-    void testPostRequestWithCorrectHeadersAndBodyToUnavailableServer() {
+    void postRequestWithCorrectHeadersAndBodyToUnavailableServer() {
         Allure.step("Отправка POST запроса с корректными Headers и Body на недоступный сервер", () -> {
             String unavailableUrl = "http://localhost:8080";
             try {
@@ -59,13 +59,14 @@ public class ServerUnavailableTests {
         });
     }
 
+
     @Test
     @DisplayName("POST запрос с некорректными Headers и Body на недоступный сервер")
     @Description("Пользователь отправляет POST запрос с некорректными Headers и Body на сервер который недоступен " +
             "и в ответ получает ошибку")
     @Severity(SeverityLevel.NORMAL)
     @Tag(TAG_NAME)
-    void testPostRequestWithIncorrectHeadersAndBodyToUnavailableServer() {
+    void postRequestWithIncorrectHeadersAndBodyToUnavailableServer() {
         Allure.step("Отправка POST запроса с некорректными Headers и Body на недоступный сервер", () -> {
             String unavailableUrl = "http://localhost:8080";
             

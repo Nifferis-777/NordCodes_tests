@@ -41,15 +41,6 @@ public class ApiClient {
         return response;
     }
 
-    public Response sendPostRequestWithSuccessValidation(String action) {
-        Response response = sendPostRequest(action);
-        response.then()
-                .assertThat()
-                .statusCode(StatusCodes.OK)
-                .body(ResponseFields.RESULT, org.hamcrest.Matchers.equalTo(ResponseFields.OK));
-        return response;
-    }
-
     public Response sendRequest(String method, String action) {
         Map<String, String> bodyParams = new HashMap<>();
         bodyParams.put(RequestParams.TOKEN, token);
